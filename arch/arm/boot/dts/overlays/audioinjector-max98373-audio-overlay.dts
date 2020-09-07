@@ -1,0 +1,42 @@
+// Definitions for audioinjector.net audio add on soundcard
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "maxim,max98373";
+
+	fragment@0 {
+		target = <&i2s>;
+		__overlay__ {
+			status = "okay";
+		};
+	};
+
+	fragment@1 {
+		target = <&i2c1>;
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "okay";
+
+			max98373@32 {
+				#sound-dai-cells = <0>;
+				compatible = "maxim,max98373";
+				reg = <0x32>;
+	                     maxim,vmon-slot-no = <0>;
+	                     maxim,imon-slot-no = <1>;
+	                     maxim,interleave-mode = <0>;
+			};
+		};
+
+	};
+
+	fragment@2 {
+		target = <&sound>;
+		__overlay__ {
+			compatible = "ai,audioinjector-max98373-soundcard";
+			i2s-controller = <&i2s>;
+			status = "okay";
+		};
+	};
+};

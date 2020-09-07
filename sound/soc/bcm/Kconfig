@@ -200,6 +200,20 @@ config SND_AUDIOINJECTOR_MAXIM_SOUNDCARD
 	help
 	  Say Y or M if you want to add support for audioinjector.net Maxim add on
 
+config SND_AUDIOINJECTOR_MAX98390_SOUNDCARD
+	tristate "Support for Max98390 add on soundcard"
+	depends on SND_BCM2708_SOC_I2S || SND_BCM2835_SOC_I2S
+	select SND_SOC_MAX98390
+	help
+	  Say Y or M if you want to add support for audioinjector.net Max98390 add on
+
+config SND_AUDIOINJECTOR_MAX98373_SOUNDCARD
+	tristate "Support for Max98373 add on soundcard"
+	depends on SND_BCM2708_SOC_I2S || SND_BCM2835_SOC_I2S
+	select SND_SOC_MAX98373
+	help
+	  Say Y or M if you want to add support for audioinjector.net Max98373 add on
+
 config SND_AUDIOINJECTOR_ISOLATED_SOUNDCARD
 	tristate "Support for audioinjector.net isolated DAC and ADC soundcard"
 	depends on SND_BCM2708_SOC_I2S || SND_BCM2835_SOC_I2S

@@ -119,6 +119,7 @@ static int max98373_dai_set_fmt(struct snd_soc_dai *codec_dai, unsigned int fmt)
 	unsigned int format = 0;
 	unsigned int invert = 0;
 
+	pr_info("[GEORGE] %s in", __func__);
 	dev_dbg(component->dev, "%s: fmt 0x%08X\n", __func__, fmt);
 
 	switch (fmt & SND_SOC_DAIFMT_INV_MASK) {
@@ -160,6 +161,7 @@ static int max98373_dai_set_fmt(struct snd_soc_dai *codec_dai, unsigned int fmt)
 		MAX98373_PCM_MODE_CFG_FORMAT_MASK,
 		format << MAX98373_PCM_MODE_CFG_FORMAT_SHIFT);
 
+	pr_info("[GEORGE] %s out", __func__);
 	return 0;
 }
 
@@ -190,6 +192,7 @@ static int max98373_set_clock(struct snd_soc_component *component,
 	if (!max98373->tdm_mode) {
 		/* BCLK configuration */
 		value = max98373_get_bclk_sel(blr_clk_ratio);
+		pr_info("[GEORGE] %s value:%d", __func__, value);
 		if (!value) {
 			dev_err(component->dev, "format unsupported %d\n",
 				params_format(params));
@@ -201,6 +204,7 @@ static int max98373_set_clock(struct snd_soc_component *component,
 			MAX98373_PCM_CLK_SETUP_BSEL_MASK,
 			value);
 	}
+	pr_info("[GEORGE] %s out", __func__);
 	return 0;
 }
 
@@ -405,6 +409,7 @@ static int max98373_dac_event(struct snd_soc_dapm_widget *w,
 	struct snd_soc_component *component = snd_soc_dapm_to_component(w->dapm);
 	struct max98373_priv *max98373 = snd_soc_component_get_drvdata(component);
 
+	pr_info("[GEORGE] %s event : %d", __func__, event);
 	switch (event) {
 	case SND_SOC_DAPM_POST_PMU:
 		regmap_update_bits(max98373->regmap,
@@ -735,6 +740,7 @@ static void max98373_reset(struct max98373_priv *max98373, struct device *dev)
 {
 	int ret, reg, count;
 
+	pr_info("[GEORGE] %s in", __func__);
 	/* Software Reset */
 	ret = regmap_update_bits(max98373->regmap,
 		MAX98373_R2000_SW_RESET,
@@ -762,6 +768,8 @@ static int max98373_probe(struct snd_soc_component *component)
 {
 	struct max98373_priv *max98373 = snd_soc_component_get_drvdata(component);
 
+	pr_info("[GEORGE] %s in", __func__);
+	
 	/* Software Reset */
 	max98373_reset(max98373, component->dev);
 
@@ -834,6 +842,7 @@ static int max98373_probe(struct snd_soc_component *component)
 		MAX98373_R2043_AMP_EN,
 		MAX98373_SPK_EN_MASK, 1);
 
+	pr_info("[GEORGE] %s out", __func__);
 	return 0;
 }
 
@@ -931,6 +940,7 @@ static int max98373_i2c_probe(struct i2c_client *i2c,
 	int reg = 0;
 	struct max98373_priv *max98373 = NULL;
 
+	pr_info("[GEORGE] %s in", __func__);
 	max98373 = devm_kzalloc(&i2c->dev, sizeof(*max98373), GFP_KERNEL);
 
 	if (!max98373) {
@@ -989,6 +999,7 @@ static int max98373_i2c_probe(struct i2c_client *i2c,
 	if (ret < 0)
 		dev_err(&i2c->dev, "Failed to register codec: %d\n", ret);
 
+	pr_info("[GEORGE] %s out", __func__);
 	return ret;
 }
 
@@ -1029,5 +1040,5 @@ static struct i2c_driver max98373_i2c_driver = {
 module_i2c_driver(max98373_i2c_driver)
 
 MODULE_DESCRIPTION("ALSA SoC MAX98373 driver");
-MODULE_AUTHOR("Ryan Lee <ryans.lee@maximintegrated.com>");
+MODULE_AUTHOR("Ryan Lee <Ryans.lee@maximintegrated.com>");
 MODULE_LICENSE("GPL");
