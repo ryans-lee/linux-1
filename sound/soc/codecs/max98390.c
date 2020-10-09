@@ -800,7 +800,8 @@ static int max98390_dsm_init(struct snd_soc_component *component)
 	dsm_param += MAX98390_DSM_PAYLOAD_OFFSET;
 	regmap_bulk_write(max98390->regmap, param_start_addr,
 		dsm_param, param_size);
-	regmap_write(max98390->regmap, MAX98390_R23E1_DSP_GLOBAL_EN, 0x01);
+	//regmap_write(max98390->regmap, MAX98390_R23E1_DSP_GLOBAL_EN, 0x01);
+	regmap_write(max98390->regmap, MAX98390_R23E1_DSP_GLOBAL_EN, 0x0);
 
 err_alloc:
 	release_firmware(fw);

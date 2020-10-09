@@ -16,6 +16,14 @@
 
 #include "../codecs/max98396.h"
 
+#define USE_TDM_MODE
+
+#ifdef USE_TDM_MODE
+#define DAI_FMT_BASE (SND_SOC_DAIFMT_CBS_CFS | SND_SOC_DAIFMT_DSP_B | SND_SOC_DAIFMT_NB_NF)
+#else
+#define DAI_FMT_BASE (SND_SOC_DAIFMT_CBS_CFS | SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_NF)	
+#endif
+
 static const unsigned int bcm2835_rates_12000000[] = {
 	8000, 16000, 32000, 44100, 48000, 96000, 88200,
 };
@@ -50,29 +58,34 @@ static int snd_audioinjector_maxim_soundcard_hw_params
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
 	int ret = 0;
 	int sr = params_rate(params);
+	unsigned int daiFmt = 0; 
+
+#ifdef USE_TDM_MODE
+	// set TDM slot configuration vmon_slot_no 0 for Tx slots
+	int width = params_width(params);
+	int ch = params_channels(params);
+	
+	pr_info("[RYAN] %s sample ch = %d, width = %d\n", __func__, ch, width);
+	
+	ret = snd_soc_dai_set_tdm_slot(rtd->codec_dai, 1, 0x10, ch, width);
+	if (ret < 0)
+		return ret;
+
+	pr_info("[RYAN] %s codec tdm slot config ret : %d\n", __func__, ret);
+
+	ret = snd_soc_dai_set_tdm_slot(rtd->cpu_dai, 0x03, 0x03, ch, width);
+	if (ret < 0)
+		return ret;
+
+	pr_info("[RYAN] %s cpu tdm slot config ret : %d\n", __func__, ret);
+	
+	daiFmt = SND_SOC_DAIFMT_CBS_CFS|SND_SOC_DAIFMT_DSP_B|SND_SOC_DAIFMT_NB_NF;
+#else
+	daiFmt = SND_SOC_DAIFMT_CBS_CFS|SND_SOC_DAIFMT_I2S|SND_SOC_DAIFMT_NB_NF;
+#endif
 
 	pr_info("[RYAN] %s sample rate = %d\n", __func__, sr);
-
-	// set codec DAI configuration
-	ret = snd_soc_dai_set_fmt(rtd->codec_dai,
-			SND_SOC_DAIFMT_CBS_CFS|SND_SOC_DAIFMT_I2S|
-			SND_SOC_DAIFMT_NB_NF);
-	if (ret < 0)
-		return ret;
-
-	pr_info("[RYAN] %s codec ret : %d\n", __func__, ret);
-
-	// set cpu DAI configuration
-	ret = snd_soc_dai_set_fmt(rtd->cpu_dai,
-			SND_SOC_DAIFMT_CBS_CFS|SND_SOC_DAIFMT_I2S|
-			SND_SOC_DAIFMT_NB_NF);
-	if (ret < 0)
-		return ret;
-
-	pr_info("[RYAN] %s cpu ret : %d\n", __func__, ret);
-	if (ret < 0)
-		return ret;
-
+	
 #if 0
 	switch (sr){
 	case 8000:
@@ -113,9 +126,8 @@ static struct snd_soc_ops snd_audioinjector_maxim_soundcard_ops = {
 
 static int audioinjector_maxim_soundcard_dai_init
 	(struct snd_soc_pcm_runtime *rtd)
-{
+{	
 	pr_info("[RYAN] %s\n", __func__);
-
 	return 0;
 }
 
@@ -130,8 +142,7 @@ static struct snd_soc_dai_link audioinjector_maxim_soundcard_dai[] = {
 		.stream_name = "AudioInjector audio",
 		.ops = &snd_audioinjector_maxim_soundcard_ops,
 		.init = audioinjector_maxim_soundcard_dai_init,
-		.dai_fmt = SND_SOC_DAIFMT_CBS_CFS | SND_SOC_DAIFMT_I2S
-			   | SND_SOC_DAIFMT_NB_NF,
+		.dai_fmt = DAI_FMT_BASE,
 		SND_SOC_DAILINK_REG(audioinjector_maxim),
 	},
 };

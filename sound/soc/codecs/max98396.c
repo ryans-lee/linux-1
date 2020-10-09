@@ -183,7 +183,7 @@ static int max98396_dai_set_fmt(struct snd_soc_dai *codec_dai, unsigned int fmt)
 	unsigned int format = 0;
 	unsigned int invert = 0;
 
-	pr_info("[RYAN] %s in", __func__);
+	pr_info("[RYAN] %s in, fmt : 0x%08x", __func__, fmt);
 	dev_dbg(component->dev, "%s: fmt 0x%08X\n", __func__, fmt);
 
 	switch (fmt & SND_SOC_DAIFMT_INV_MASK) {
@@ -225,7 +225,7 @@ static int max98396_dai_set_fmt(struct snd_soc_dai *codec_dai, unsigned int fmt)
 		MAX98396_PCM_MODE_CFG_FORMAT_MASK,
 		format << MAX98396_PCM_MODE_CFG_FORMAT_SHIFT);
 
-	pr_info("[RYAN] %s out", __func__);
+	pr_info("[RYAN] %s out, format : %d", __func__, format);
 	return 0;
 }
 
@@ -385,6 +385,8 @@ static int max98396_dai_tdm_slot(struct snd_soc_dai *dai,
 	int bsel = 0;
 	unsigned int chan_sz = 0;
 
+	pr_info("[RYAN] %s rx_mask : 0x%08x, tx_mask : 0x%08x", __func__, rx_mask, tx_mask);
+	
 	if (!tx_mask && !rx_mask && !slots && !slot_width)
 		max98396->tdm_mode = false;
 	else
@@ -442,6 +444,7 @@ static int max98396_dai_tdm_slot(struct snd_soc_dai *dai,
 		MAX98396_R2052_PCM_TX_HIZ_CTRL_7,
 		(~tx_mask & 0xFF00) >> 8);
 
+	pr_info("[RYAN] %s out", __func__);
 	return 0;
 }
 
@@ -462,8 +465,8 @@ static int max98396_dac_event(struct snd_soc_dapm_widget *w,
 	struct snd_soc_component *component =
 		snd_soc_dapm_to_component(w->dapm);
 	struct max98396_priv *max98396 =
-		snd_soc_component_get_drvdata(component);
-
+		snd_soc_component_get_drvdata(component);		
+		
 	pr_info("[RYAN] %s event : %d", __func__, event);
 	switch (event) {
 	case SND_SOC_DAPM_POST_PMU:
@@ -486,6 +489,7 @@ static int max98396_dac_event(struct snd_soc_dapm_widget *w,
 	default:
 		return 0;
 	}
+	
 	return 0;
 }
 
@@ -669,15 +673,25 @@ static int max98396_probe(struct snd_soc_component *component)
 	/* Software Reset */
 	max98396_reset(max98396, component->dev);
 
+	/* disable all monitoring */
+	regmap_write(max98396->regmap,
+		MAX98396_R203F_ENABLE_CTRLS, 0x00);
+	
 	/* L/R mix configuration */
 	regmap_write(max98396->regmap,
-		MAX98396_R2055_PCM_RX_SRC1, 0x02);
+		MAX98396_R2055_PCM_RX_SRC1, 0x00);
 
 	regmap_write(max98396->regmap,
 		MAX98396_R2056_PCM_RX_SRC2, 0x10);
+	/* Tx enable */
+	regmap_write(max98396->regmap,
+		MAX98396_R205F_PCM_TX_EN, 1);
+	/* PCM V MON enable */
+	regmap_write(max98396->regmap,
+		MAX98396_R205D_PCM_TX_SRC_EN, 1);		
 	/* Enable DC blocker */
 	regmap_update_bits(max98396->regmap,
-		MAX98396_R2092_AMP_DSP_CFG, 1, 1);
+		MAX98396_R2092_AMP_DSP_CFG, 0x21, 0x01);
 	/* Enable IMON VMON DC blocker */
 	regmap_update_bits(max98396->regmap,
 		MAX98396_R20E0_IV_SENSE_PATH_CFG, 3, 3);
