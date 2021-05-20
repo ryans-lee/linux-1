@@ -25,6 +25,7 @@ dtbo-$(CONFIG_ARCH_BCM2835) += \
 	audioinjector-isolated-soundcard.dtbo \
 	audioinjector-ultra.dtbo \
 	audioinjector-wm8731-audio.dtbo \
+	audioinjector-max98520-audio.dtbo \
 	audiosense-pi.dtbo \
 	audremap.dtbo \
 	balena-fin.dtbo \
