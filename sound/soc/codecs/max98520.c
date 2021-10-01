@@ -36,7 +36,7 @@ static struct reg_default max98520_reg[] = {
 	{MAX98520_R204F_PCM_RX_EN, 0x00},
 	{MAX98520_R2090_AMP_VOL_CTRL, 0x00},
 	{MAX98520_R2091_AMP_PATH_GAIN, 0x03},
-	{MAX98520_R2092_AMP_DSP_CFG, 0x22},
+	{MAX98520_R2092_AMP_DSP_CFG, 0x02},
 	{MAX98520_R2094_SSM_CFG, 0x01},
 	{MAX98520_R2095_AMP_CFG, 0xF0},
 	{MAX98520_R209F_AMP_EN, 0x00},
@@ -550,6 +550,9 @@ static int max98520_probe(struct snd_soc_component *component)
 	/* Enable DC blocker */
 	regmap_update_bits(max98520->regmap,
 		MAX98520_R2092_AMP_DSP_CFG, 1, 1);
+	/* Disable Speaker Safe Mode */
+	regmap_update_bits(max98520->regmap,
+		MAX98520_R2092_AMP_DSP_CFG, MAX98520_SPK_SAFE_EN_MASK, 0);
 	/* Enable Clock Monitor Auto-restart */
 	regmap_write(max98520->regmap,
 		MAX98520_R2030_CLK_MON_CTRL, 0x1);
