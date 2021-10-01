@@ -36,7 +36,7 @@ static struct reg_default max98520_reg[] = {
 	{MAX98520_R204F_PCM_RX_EN, 0x00},
 	{MAX98520_R2090_AMP_VOL_CTRL, 0x00},
 	{MAX98520_R2091_AMP_PATH_GAIN, 0x03},
-	{MAX98520_R2092_AMP_DSP_CFG, 0x22},
+	{MAX98520_R2092_AMP_DSP_CFG, 0x02},
 	{MAX98520_R2094_SSM_CFG, 0x01},
 	{MAX98520_R2095_AMP_CFG, 0xF0},
 	{MAX98520_R209F_AMP_EN, 0x00},
@@ -550,6 +550,9 @@ static int max98520_probe(struct snd_soc_component *component)
 	/* Enable DC blocker */
 	regmap_update_bits(max98520->regmap,
 		MAX98520_R2092_AMP_DSP_CFG, 1, 1);
+	/* Disable Speaker Safe Mode */
+	regmap_update_bits(max98520->regmap,
+		MAX98520_R2092_AMP_DSP_CFG, MAX98520_SPK_SAFE_EN_MASK, 0);
 	/* Enable Clock Monitor Auto-restart */
 	regmap_write(max98520->regmap,
 		MAX98520_R2030_CLK_MON_CTRL, 0x1);
@@ -624,6 +627,15 @@ static int max98520_i2c_probe(struct i2c_client *i2c,
 	int ret = 0;
 	int reg = 0;
 	struct max98520_priv *max98520 = NULL;
+	struct i2c_adapter *adapter = to_i2c_adapter(i2c->dev.parent);
+
+	ret = i2c_check_functionality(adapter,
+		I2C_FUNC_SMBUS_BYTE
+		| I2C_FUNC_SMBUS_BYTE_DATA);
+	if (!ret) {
+		dev_err(&i2c->dev, "I2C check functionality failed\n");
+		return -ENXIO;
+	}
 
 	pr_info("[MAX98520_DEBUG] %s in", __func__);
 	max98520 = devm_kzalloc(&i2c->dev, sizeof(*max98520), GFP_KERNEL);
@@ -718,4 +730,5 @@ module_i2c_driver(max98520_i2c_driver)
 
 MODULE_DESCRIPTION("ALSA SoC MAX98520 driver");
 MODULE_AUTHOR("Ryan Lee <ryans.lee@maximintegrated.com>");
+MODULE_AUTHOR("George Song <george.song@maximintegrated.com>");
 MODULE_LICENSE("GPL");
