@@ -185,7 +185,8 @@ static int audioinjector_maxim_soundcard_probe(struct platform_device *pdev)
 
 	pr_info("[MAX98520_DEBUG] %s +++ \n", __func__);
 	card->dev = &pdev->dev;
-
+	card->owner = THIS_MODULE;
+	
 	if (pdev->dev.of_node) {
 		struct snd_soc_dai_link *dai =
 			&audioinjector_maxim_soundcard_dai[0];
