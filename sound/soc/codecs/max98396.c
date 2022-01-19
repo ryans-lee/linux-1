@@ -719,6 +719,9 @@ static int max98396_probe(struct snd_soc_component *component)
 		MAX98396_CLK_MON_AUTO_RESTART_MASK,
 		MAX98396_CLK_MON_AUTO_RESTART_MASK);
 
+	regmap_write(max98396->regmap,
+		MAX98396_R205D_PCM_TX_SRC_EN, 3);
+
 	pr_info("[RYAN] %s out", __func__);
 	return 0;
 }
